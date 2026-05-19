@@ -62,14 +62,21 @@ def convert_to_audio():
     engine.setProperty("rate", 150)
     engine.setProperty("volume", 1)
 
-    output_file = f"{pdf_name}audiobook.mp3"
+    output_file = filedialog.asksaveasfilename(
+        defaultextension=".mp3",
+        initialfile=f"{pdf_name}_audiobook.mp3",
+        filetypes=[("MP3 Files", "*mp3")]
+    )
 
-    engine.save_to_file(text, output_file)
+    if output_file:
+        engine.save_to_file(text, output_file)
 
-    engine.runAndWait()
+        engine.runAndWait()
 
-    status_text.set("Audiobook created successfully!")
-
+        status_text.set("Audiobook created successfully!")
+    else:
+        return
+    
 title_label = tk.Label(
     root,
     text="PDF to Audiobook Converter",
