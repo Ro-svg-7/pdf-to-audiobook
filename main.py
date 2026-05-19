@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog, ttk
+from PyPDF2 import PdfReader
 
 root = tk.Tk()
 root.title("PDF to AudioBook")
@@ -26,6 +27,26 @@ def convert_to_audio():
         status_text.set("Please upload a PDF file")
         return
     status_text.set("Converting PDF to audiobook...")
+
+    text = extract_text()
+    print(text)
+
+def extract_text():
+    pdf_path = selected_file.get()
+
+    with open(pdf_path, "rb") as file:
+        reader = PdfReader(file)
+        number_of_pages = len(reader.pages)
+        full_text = ""
+
+        for i in range(number_of_pages):
+            page = reader.pages[i]
+            text = page.extract_text()
+            if text:
+                full_text += text + "\n"
+
+    print(full_text)
+    return full_text
 
 title_label = tk.Label(
     root,
