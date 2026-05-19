@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import filedialog, ttk
 from PyPDF2 import PdfReader
@@ -5,7 +6,7 @@ import pyttsx3
 
 root = tk.Tk()
 root.title("PDF to AudioBook")
-root.geometry("600x400")
+root.geometry("700x500")
 root.configure(bg="black")
 
 selected_file = tk.StringVar()
@@ -23,7 +24,30 @@ def upload_pdf():
         selected_file.set(filepath)
         status_text.set("PDF upload successful")
 
+def extract_text():
+    pdf_path = selected_file.get()
+    
+    with open(pdf_path, "rb") as file:
+        reader = PdfReader(file)
+        number_of_pages = len(reader.pages)
+        full_text = ""
+
+        for i in range(number_of_pages):
+            page = reader.pages[i]
+            text = page.extract_text()
+            if text:
+                full_text += text + "\n"
+
+            progress["value"] = ((i+1) / number_of_pages) * 100
+            root.update_idletasks()
+
+    return full_text
+
 def convert_to_audio():
+    pdf_path = selected_file.get()
+    pdf_name = os.path.basename(pdf_path)
+    pdf_name = os.path.splitext(pdf_name)[0]
+
     if selected_file.get() == "No PDF selected":
         status_text.set("Please upload a PDF file")
         return
@@ -38,7 +62,7 @@ def convert_to_audio():
     engine.setProperty("rate", 150)
     engine.setProperty("volume", 1)
 
-    output_file = "audiobook.mp3"
+    output_file = f"{pdf_name}audiobook.mp3"
 
     engine.save_to_file(text, output_file)
 
@@ -46,81 +70,80 @@ def convert_to_audio():
 
     status_text.set("Audiobook created successfully!")
 
-def extract_text():
-    pdf_path = selected_file.get()
-
-    with open(pdf_path, "rb") as file:
-        reader = PdfReader(file)
-        number_of_pages = len(reader.pages)
-        full_text = ""
-
-        for i in range(number_of_pages):
-            page = reader.pages[i]
-            text = page.extract_text()
-            if text:
-                full_text += text + "\n"
-
-    print(full_text)
-    return full_text
-
 title_label = tk.Label(
     root,
     text="PDF to Audiobook Converter",
-    font=("Arial", 22, "bold"),
+    font=("Arial", 24, "bold"),
     bg="#1e1e1e",
     fg="white"
 )
 
-title_label.pack(pady=20)
+title_label.pack(pady=25)
 
 file_label = tk.Label(
     root,
-    text="Upload PDF",
-    font=("Arial", 12),
+    textvariable=selected_file,
+    font=("Arial", 10),
     bg="black",
-    fg="white",
-    padx=20,
-    pady=10
+    fg="#bbbbbb",
+    wraplength=500
 )
 file_label.pack(pady=10)
 
 upload_button = tk.Button(
     root,
     text="Upload Button",
-    font=("Arial", 12),
+    font=("Arial", 12,"bold"),
     bg="#4CAF50",
     fg="white",
-    padx=20,
-    pady=10,
+    activebackground="#45a049",
+    padx=25,
+    pady=12,
     command=upload_pdf
 )
-upload_button.pack(pady=10)
+upload_button.pack(pady=15)
 
 convert_button = tk.Button(
     root,
     text="Convert to Audiobook",
-    font=("Arial", 12),
+    font=("Arial", 12, "bold"),
     bg="#2196F3",
     fg="white",
-    padx=20,
-    pady=10,
+    activebackground="#1976D2",
+    relief="flat",
+    padx=25,
+    pady=12,
     command=convert_to_audio
 )
 convert_button.pack(pady=10)
 
+style = ttk.Style()
+
+style.theme_use("clam")
+
+style.configure(
+    "Custom.Horizontal.TProgressbar",
+    troughcolor="#2b2b2b",
+    background="#2196F3",
+    bordercolor = "#2b2b2b",
+    lightcolor="#2196F3",
+    darkcolor="#2196F3"
+)
+
 progress = ttk.Progressbar(
     root,
+    style="Custom.Horizontal.TProgressbar",
     orient="horizontal",
-    length=400,
+    length=450,
     mode="determinate"
 )
 
-progress.pack(pady=20)
+progress.pack(pady=30)
 
 status_label = tk.Label(
     root,
     textvariable=status_text,
-    font=("Arial", 10),
+    font=("Arial", 11),
     bg="#1e1e1e",
     fg="#aaaaaa"
 )
