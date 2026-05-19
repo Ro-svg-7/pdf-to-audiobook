@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, ttk
 from PyPDF2 import PdfReader
+import pyttsx3
 
 root = tk.Tk()
 root.title("PDF to AudioBook")
@@ -29,7 +30,21 @@ def convert_to_audio():
     status_text.set("Converting PDF to audiobook...")
 
     text = extract_text()
-    print(text)
+    
+    status_text.set("Converting to Audiobook...")
+
+    engine = pyttsx3.init()
+
+    engine.setProperty("rate", 150)
+    engine.setProperty("volume", 1)
+
+    output_file = "audiobook.mp3"
+
+    engine.save_to_file(text, output_file)
+
+    engine.runAndWait()
+
+    status_text.set("Audiobook created successfully!")
 
 def extract_text():
     pdf_path = selected_file.get()
